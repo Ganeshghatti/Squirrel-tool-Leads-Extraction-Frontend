@@ -9,7 +9,7 @@ const CheckAuth = ({ children }: { children: React.ReactNode }) => {
     if (token == null) {
       router.push("/");
     } else {
-        router.push("/dashboard");
+        router.push("/dashboard/leads");
     }
   }, []);
   return <>{children}</>;
