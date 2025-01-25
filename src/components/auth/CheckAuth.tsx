@@ -8,9 +8,7 @@ const CheckAuth = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem("token");
     if (token == null) {
       router.push("/");
-    } else {
-        router.push("/dashboard/");
-    }
+    } 
   }, []);
   return <>{children}</>;
 };
