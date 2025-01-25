@@ -441,7 +441,8 @@ export default function LeadCollectionTable({
         </div>
       </div>
 
-      <Table className="overflow-x-auto border !rounded-md">
+      <div className="border !rounded-md">
+      <Table className="overflow-x-auto">
         <TableHeader className="bg-gray-100">
           <TableRow>
             <TableHead className="p-3 text-left ">Title</TableHead>
@@ -561,6 +562,7 @@ export default function LeadCollectionTable({
           ))}
         </TableBody>
       </Table>
+      </div>
 
       <Dialog
         open={!!selectedLead}
