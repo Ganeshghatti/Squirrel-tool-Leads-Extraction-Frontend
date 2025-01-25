@@ -28,19 +28,19 @@ export default function LeadCollectionContainer({ id }: { id: string }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get<LeadCollectionResponse>(`/leadcollection/${id}`)
-        setData(response.data)
-      } catch (err) {
-        setError("Failed to fetch lead collection data")
-        console.error(err)
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstance.get<LeadCollectionResponse>(`/leadcollection/${id}`)
+      setData(response.data)
+    } catch (err) {
+      setError("Failed to fetch lead collection data")
+      console.error(err)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchData()
   }, [id])
 
@@ -49,7 +49,7 @@ export default function LeadCollectionContainer({ id }: { id: string }) {
   if (!data) return <div>No data available</div>
 
   return <div className="w-fit">
-    <LeadCollectionTable leads={data.leads} id={id} />
+    <LeadCollectionTable leads={data.leads.reverse()} id={id} fetchLeads={fetchData} />
   </div>
 }
 

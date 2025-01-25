@@ -29,7 +29,7 @@ export default function LeadGenerationPage() {
 
     try {
       await axiosInstance.post("/mapextract/new", formData)
-      router.push("/dashboard/leads")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Error submitting form:", error)
       // Handle error (e.g., show error message to user)

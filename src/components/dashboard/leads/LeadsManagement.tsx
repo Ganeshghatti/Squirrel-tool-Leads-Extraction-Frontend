@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { PlusCircle, Loader2 } from "lucide-react"
 import axiosInstance from "@/lib/axiosInstance"
 import Link from "next/link"
+import { toast } from "sonner"
 
 interface Lead {
   title: string
@@ -21,6 +25,24 @@ interface Lead {
 export function LeadsManagement() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  // Single state for form data
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    location: ""
+  })
+
+  // Generic handler for form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }))
+  }
 
   // Fetch leads from the API
   const fetchLeads = async () => {
@@ -30,14 +52,41 @@ export function LeadsManagement() {
       const { success, leadCollection } = response.data
 
       if (success) {
-        setLeads(leadCollection) // Update the state with fetched leads
+        setLeads(leadCollection.reverse())
       } else {
-        console.error("Failed to fetch leads:", response.data.message)
+        toast.error("Failed to fetch leads")
       }
     } catch (error: any) {
-      console.error("Error fetching leads:", error.response?.data || error.message)
+      toast.error("Error fetching leads")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Create new lead
+  const handleCreateLead = async () => {
+    try {
+      const response = await axiosInstance.post("/leadcollection/create", formData)
+
+      if (response.data.success) {
+        toast.success("Lead created successfully")
+        setIsDialogOpen(false)
+        
+        // Reset form
+        setFormData({
+          title: "",
+          description: "",
+          category: "",
+          location: ""
+        })
+
+        // Refresh leads
+        fetchLeads()
+      } else {
+        toast.error("Failed to create lead")
+      }
+    } catch (error: any) {
+      toast.error("Error creating lead")
     }
   }
 
@@ -50,12 +99,54 @@ export function LeadsManagement() {
     <div className="!w-full h-full p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Leads Management</h1>
-        <Link href="/dashboard/leads/create">
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Create More Leads
-          </Button>
-        </Link>
+        <div className="flex space-x-2">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-purple-700 hover:bg-purple-600">Create New Lead</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Lead</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                {["title", "description", "category", "location"].map((field) => (
+                  <div key={field} className="grid grid-cols-4 gap-4">
+                    <Label htmlFor={field} className="text-left capitalize">{field}</Label>
+                    <Input 
+                      id={field} 
+                      value={formData[field as keyof typeof formData]}
+                      placeholder={`Enter ${field}`}
+                      onChange={handleInputChange}
+                      className="col-span-3" 
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end space-x-2 p-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleCreateLead}
+                  disabled={Object.values(formData).some(val => !val)}
+                >
+                  Create Lead
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Link href="/dashboard/leads/create">
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" /> Find More Leads
+            </Button>
+          </Link>
+          
+        </div>
       </div>
+      {/* Rest of the component remains the same */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -94,4 +185,3 @@ export function LeadsManagement() {
     </div>
   )
 }
-
