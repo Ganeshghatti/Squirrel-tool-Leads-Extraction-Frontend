@@ -7,7 +7,7 @@ export default async function Page({
 }) {
   const { id } = await params
   return (
-    <div className="p-4 ">
+    <div className="p-4 w-full">
       <h1 className="text-2xl font-bold mb-4">Lead Collections</h1>
       <LeadCollectionContainer id={id} />
     </div>

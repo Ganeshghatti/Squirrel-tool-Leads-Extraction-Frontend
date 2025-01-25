@@ -441,131 +441,126 @@ export default function LeadCollectionTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <Table className="w-full">
-          <TableHeader className="bg-gray-100">
-            <TableRow>
-              <TableHead className="p-3 text-left !w-[50px]">Title</TableHead>
-              <TableHead className="p-3 text-left w-[50px]">
-                Description
-              </TableHead>
-              <TableHead className="p-3 text-left w-[50px]">Phone</TableHead>
-              <TableHead className="p-3 text-left w-[50px]">Email</TableHead>
-              <TableHead className="p-3 text-left w-[50px]">Website</TableHead>
-              <TableHead className="p-3 text-left w-[50px]">Address</TableHead>
-              <TableHead className="p-3 text-left w-[50px]">
-                Created At
-              </TableHead>
-              <TableHead className="p-3 text-left w-[50px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leads.map((lead) => (
-              <TableRow key={lead._id} className="hover:bg-gray-50 border-b">
-                <TableCell className="p-3 align-top">{lead.title}</TableCell>
-                <TableCell className="p-3 align-top">
-                  <span className="line-clamp-2">{lead.description}</span>
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.phone[0] && (
-                    <ClickableLink href={`tel:${lead.phone[0]}`}>
-                      <Phone size={12} /> {lead.phone[0]}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.email[0] && (
-                    <ClickableLink href={`mailto:${lead.email[0]}`}>
-                      <Mail size={12} /> {lead.email[0]}
-                    </ClickableLink>
-                  )}
-                  {lead.email.length > 1 && (
-                    <div>
-                      <Button
-                        variant="link"
-                        className="p-0 text-blue-600 hover:underline"
-                        onClick={() => setSelectedLead(lead)}
-                      >
-                        View More
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.website && (
-                    <ClickableLink
-                      href={
-                        lead.website.startsWith("http")
-                          ? lead.website
-                          : `https://${lead.website}`
-                      }
-                    >
-                      {lead.website}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.maplink && (
-                    <ClickableLink href={lead.maplink}>
-                      <MapPin size={12} /> {lead.address}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {new Date(lead.createdAt).toLocaleString()}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  <div className="flex items-center gap-2">
+      <Table className="overflow-x-auto border !rounded-md">
+        <TableHeader className="bg-gray-100">
+          <TableRow>
+            <TableHead className="p-3 text-left ">Title</TableHead>
+            <TableHead className="p-3 text-left">
+              Description
+            </TableHead>
+            <TableHead className="p-3 text-left">Phone</TableHead>
+            <TableHead className="p-3 text-left">Email</TableHead>
+            <TableHead className="p-3 text-left">Website</TableHead>
+            <TableHead className="p-3 text-left">Address</TableHead>
+            <TableHead className="p-3 text-left">Created At</TableHead>
+            <TableHead className="p-3 text-left">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {leads.map((lead) => (
+            <TableRow key={lead._id} className="hover:bg-gray-50 border-b">
+              <TableCell className="p-3 align-top">{lead.title}</TableCell>
+              <TableCell className="p-3 align-top">
+                <span className="line-clamp-2">{lead.description}</span>
+              </TableCell>
+              <TableCell className="p-3 align-top">
+                {lead.phone[0] && (
+                  <ClickableLink href={`tel:${lead.phone[0]}`}>
+                    <Phone size={12} /> {lead.phone[0]}
+                  </ClickableLink>
+                )}
+              </TableCell>
+              <TableCell className="p-3 align-top w-[100px]">
+                {lead.email[0] && (
+                  <ClickableLink href={`mailto:${lead.email[0]}`}>
+                    <Mail size={12} /> {lead.email[0]}
+                  </ClickableLink>
+                )}
+                {lead.email.length > 1 && (
+                  <div>
                     <Button
-                      variant="outline"
-                      className="hover:bg-gray-100"
+                      variant="link"
+                      className="p-0 text-blue-600 hover:underline"
                       onClick={() => setSelectedLead(lead)}
                     >
-                      View Details
+                      View More
                     </Button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="hover:bg-gray-100">
-                          <Trash2 size={16} className="text-red-500" />
-
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Delete Lead</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete this lead? This
-                            action cannot be undone.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button variant="outline" disabled={isDeletingLead}>
-                            Cancel
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleDeleteLead(lead._id)}
-                            disabled={isDeletingLead}
-                          >
-                            {isDeletingLead ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                                Deleting...
-                              </>
-                            ) : (
-                              "Delete"
-                            )}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
                   </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                )}
+              </TableCell>
+              <TableCell className="p-3 align-top !w-[100px] overflow-hidden">
+                {lead.website && (
+                  <ClickableLink
+                    href={
+                      lead.website.startsWith("http")
+                        ? lead.website
+                        : `https://${lead.website}`
+                    }
+                  >
+                    {lead.website}
+                  </ClickableLink>
+                )}
+              </TableCell>
+              <TableCell className="p-3 align-top">
+                {lead.maplink && (
+                  <ClickableLink href={lead.maplink}>
+                    <MapPin size={12} /> {lead.address}
+                  </ClickableLink>
+                )}
+              </TableCell>
+              <TableCell className="p-3 align-top">
+                {new Date(lead.createdAt).toLocaleDateString()}
+              </TableCell>
+              <TableCell className="p-3 align-top">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="hover:bg-gray-100"
+                    onClick={() => setSelectedLead(lead)}
+                  >
+                    View Details
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="hover:bg-gray-100">
+                        <Trash2 size={16} className="text-red-500" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Delete Lead</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to delete this lead? This action
+                          cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button variant="outline" disabled={isDeletingLead}>
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleDeleteLead(lead._id)}
+                          disabled={isDeletingLead}
+                        >
+                          {isDeletingLead ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                              Deleting...
+                            </>
+                          ) : (
+                            "Delete"
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       <Dialog
         open={!!selectedLead}

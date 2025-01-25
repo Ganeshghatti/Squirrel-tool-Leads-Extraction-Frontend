@@ -48,7 +48,7 @@ export default function LeadCollectionContainer({ id }: { id: string }) {
   if (error) return <div>Error: {error}</div>
   if (!data) return <div>No data available</div>
 
-  return <div className="w-fit">
+  return <div className="w-full">
     <LeadCollectionTable leads={data.leads.reverse()} id={id} fetchLeads={fetchData} />
   </div>
 }
