@@ -5,7 +5,7 @@ export default async function Page({
 }: {
   params: { id: string };
 }) {
-    const id = await params?.id;
+  const { id } = await params
   return (
     <div className="p-4 ">
       <h1 className="text-2xl font-bold mb-4">Lead Collections</h1>

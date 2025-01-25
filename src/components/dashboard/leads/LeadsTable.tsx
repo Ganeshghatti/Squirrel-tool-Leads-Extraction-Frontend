@@ -53,7 +53,21 @@ const ClickableLink = ({
 export default function LeadCollectionTable({ leads, id, fetchLeads }: LeadCollectionTableProps) {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isSendEmailModalOpen, setIsSendEmailModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [emailFormData, setEmailFormData] = useState({
+    subject: "",
+    optionalBody: ""
+  })
+
+  // Generic handler for email form input changes
+  const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setEmailFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }))
+  }
 
   // Single state for form data
   const [formData, setFormData] = useState({
@@ -87,11 +101,41 @@ export default function LeadCollectionTable({ leads, id, fetchLeads }: LeadColle
   const handleFetchEmails = async () => {
     try {
       await axiosInstance.post(`/emailextract/collection/${id}`)
-      toast.success("Emails fetched successfully")
+      toast.success("Emails Search Started, Come back later to see the results!")
     } catch (error) {
       toast.error("Error fetching emails")
     }
   }
+
+  const handleSendEmails = async () => {
+    // Validate subject is not empty
+    if (!emailFormData.subject.trim()) {
+      toast.error("Subject is required")
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await axiosInstance.post(`/outreach/send/${id}`, {
+        subject: emailFormData.subject,
+        optionalBody: emailFormData.optionalBody
+      })
+
+      toast.success("Emails sent successfully")
+      setIsSendEmailModalOpen(false)
+      
+      // Reset email form
+      setEmailFormData({
+        subject: "",
+        optionalBody: ""
+      })
+    } catch (error) {
+      toast.error("Failed to send emails")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
 
   const handleCreateLead = async () => {
     setIsLoading(true)
@@ -131,7 +175,68 @@ export default function LeadCollectionTable({ leads, id, fetchLeads }: LeadColle
 
   return (
     <div className="w-full">
-      <div className="mb-4 flex justify-end items-center gap-4">
+      <div className="mb-4 flex justify-between items-center gap-4">
+      <Dialog open={isSendEmailModalOpen} onOpenChange={setIsSendEmailModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-red-600 hover:bg-red-500">
+              Send Email 
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+              <DialogTitle>Send Emails</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* Subject - Required */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="subject" className="text-left">
+                  Subject *
+                </Label>
+                <Input
+                  id="subject"
+                  value={emailFormData.subject}
+                  onChange={handleEmailInputChange}
+                  className="col-span-3"
+                  placeholder="Enter email subject"
+                  required
+                />
+              </div>
+
+              {/* Optional Body */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="optionalBody" className="text-left">
+                  Body
+                </Label>
+                <Input
+                  id="optionalBody"
+                  value={emailFormData.optionalBody}
+                  onChange={handleEmailInputChange}
+                  className="col-span-3"
+                  placeholder="Optional email body"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 p-4">
+              <Button variant="outline" onClick={() => setIsSendEmailModalOpen(false)} disabled={isLoading}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSendEmails}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                  </>
+                ) : (
+                  "Send Emails"
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <div className="flex items-center gap-4">
         <Button onClick={handleFetchEmails} className="bg-blue-600 text-white hover:bg-blue-700">
           Fetch Emails
         </Button>
@@ -269,6 +374,7 @@ export default function LeadCollectionTable({ leads, id, fetchLeads }: LeadColle
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
