@@ -14,6 +14,7 @@ interface Lead {
   address: string
   maplink: string
   createdAt: string
+  leadCollectionId: string
 }
 
 interface LeadCollectionResponse {

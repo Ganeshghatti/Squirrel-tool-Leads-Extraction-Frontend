@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URI, 
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URI,
 });
 
 // Add an interceptor to inject the token
