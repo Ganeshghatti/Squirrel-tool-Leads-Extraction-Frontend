@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { PlusCircle, Loader2, MinusCircle } from "lucide-react"
 import axiosInstance from "@/lib/axiosInstance"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -26,7 +26,7 @@ export function LeadsManagement() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
+
   // Single state for form data
   const [formData, setFormData] = useState({
     title: "",
@@ -50,7 +50,7 @@ export function LeadsManagement() {
     try {
       const response = await axiosInstance.get("/leadcollection/all")
       const { success, leadCollection } = response.data
-
+      
       if (success) {
         setLeads(leadCollection.reverse())
       } else {
@@ -71,7 +71,7 @@ export function LeadsManagement() {
       if (response.data.success) {
         toast.success("Lead created successfully")
         setIsDialogOpen(false)
-        
+
         // Reset form
         setFormData({
           title: "",
@@ -100,7 +100,8 @@ export function LeadsManagement() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Leads Management</h1>
         <div className="flex space-x-2">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="bg-purple-700 hover:bg-purple-600">Create New Lead</Button>
             </DialogTrigger>
@@ -112,24 +113,24 @@ export function LeadsManagement() {
                 {["title", "description", "category", "location"].map((field) => (
                   <div key={field} className="grid grid-cols-4 gap-4">
                     <Label htmlFor={field} className="text-left capitalize">{field}</Label>
-                    <Input 
-                      id={field} 
+                    <Input
+                      id={field}
                       value={formData[field as keyof typeof formData]}
                       placeholder={`Enter ${field}`}
                       onChange={handleInputChange}
-                      className="col-span-3" 
+                      className="col-span-3"
                     />
                   </div>
                 ))}
               </div>
               <div className="flex justify-end space-x-2 p-4">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleCreateLead}
                   disabled={Object.values(formData).some(val => !val)}
                 >
@@ -143,7 +144,8 @@ export function LeadsManagement() {
               <PlusCircle className="mr-2 h-4 w-4" /> Find More Leads
             </Button>
           </Link>
-          
+
+
         </div>
       </div>
       {/* Rest of the component remains the same */}
