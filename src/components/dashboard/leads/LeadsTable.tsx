@@ -269,6 +269,13 @@ export default function LeadCollectionTable({
     }));
   };
 
+  const removeEmail = (index: number) => {
+    setEditLead((prev) => ({
+      ...prev!,
+      email: prev!.email.filter((_, i) => i !== index),
+    }));
+  };
+
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-between items-center gap-4">
@@ -802,8 +809,17 @@ export default function LeadCollectionTable({
                       }}
                       placeholder="Enter email"
                     />
+                    <Button
+                      type="button"
+                      onClick={() => removeEmail(index)}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Remove
+                    </Button>
                   </div>
                 ))}
+
                 <Button
                   type="button"
                   onClick={addEmail}
