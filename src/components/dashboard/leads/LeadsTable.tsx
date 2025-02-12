@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { saveAs } from "file-saver";
+import { parse } from "json2csv";
 import {
   Table,
   TableBody,
@@ -22,7 +24,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { Phone, Mail, MapPin, Loader2, Trash2, Edit2 } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Loader2,
+  Trash2,
+  Edit2,
+  MoveRight,
+} from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "sonner";
 
@@ -276,6 +286,23 @@ export default function LeadCollectionTable({
     }));
   };
 
+  const exportLeads = () => {
+    if (leads.length === 0) {
+      toast.error("No leads available to export");
+      return;
+    }
+
+    const formattedLeads = leads.map((lead) => ({
+      ...lead,
+      phone: lead.phone.length > 0 ? lead.phone.join(", ") : "",
+      email: lead.email.length > 0 ? lead.email.join(", ") : "",
+    }));
+
+    const csv = parse(formattedLeads);
+    const blob = new Blob([csv], { type: "text/csv" });
+    saveAs(blob, "leads.csv");
+  };
+
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-between items-center gap-4">
@@ -339,6 +366,12 @@ export default function LeadCollectionTable({
         </Dialog>
 
         <div className="flex items-center gap-4">
+          <Button
+            onClick={exportLeads}
+            className="bg-transparent text-black border-2 hover:text-white"
+          >
+            <MoveRight className="mr-2 h-4 w-4" /> Export to CSV
+          </Button>
           <Button
             onClick={() => setIsDeleteDialogOpen(true)}
             className="bg-red-700 hover:bg-red-600"
