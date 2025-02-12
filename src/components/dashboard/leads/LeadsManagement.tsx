@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { saveAs } from "file-saver";
-import { parse } from "json2csv";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -76,19 +74,6 @@ export function LeadsManagement() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const exportLeads = () => {
-    if (leads.length === 0) {
-      toast.error("No leads available to export");
-      return;
-    }
-
-    const csv = parse(leads);
-    console.log(csv);
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    saveAs(blob, "leads.csv");
   };
 
   // Create new lead
@@ -180,12 +165,6 @@ export function LeadsManagement() {
               <PlusCircle className="mr-2 h-4 w-4" /> Find More Leads
             </Button>
           </Link>
-          <Button
-            onClick={exportLeads}
-            className="bg-transparent text-black border-2 hover:text-white"
-          >
-            <MoveRight className="mr-2 h-4 w-4" /> Export to CSV
-          </Button>
         </div>
       </div>
       {/* Rest of the component remains the same */}
