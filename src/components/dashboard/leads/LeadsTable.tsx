@@ -292,9 +292,13 @@ export default function LeadCollectionTable({
       return;
     }
 
-    const csv = parse(leads);
-    console.log(csv);
+    const formattedLeads = leads.map((lead) => ({
+      ...lead,
+      phone: lead.phone.length > 0 ? lead.phone.join(", ") : "",
+      email: lead.email.length > 0 ? lead.email.join(", ") : "",
+    }));
 
+    const csv = parse(formattedLeads);
     const blob = new Blob([csv], { type: "text/csv" });
     saveAs(blob, "leads.csv");
   };
