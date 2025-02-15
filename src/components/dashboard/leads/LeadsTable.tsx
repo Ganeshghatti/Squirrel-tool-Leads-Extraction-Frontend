@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { title } from "process";
 
 // Interface for Lead
 interface Lead {
@@ -104,6 +105,7 @@ export default function LeadCollectionTable({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editLead, setEditLead] = useState<Lead | null>(null);
+  const [showOnlyWithEmail, setShowOnlyWithEmail] = useState(false);
 
   const [emailFormData, setEmailFormData] = useState({
     subject: "",
@@ -171,31 +173,31 @@ export default function LeadCollectionTable({
     }
   };
 
-  const handleSendEmails = async () => {
-    if (!emailFormData.subject.trim()) {
-      toast.error("Subject is required");
-      return;
-    }
+  // const handleSendEmails = async () => {
+  //   if (!emailFormData.subject.trim()) {
+  //     toast.error("Subject is required");
+  //     return;
+  //   }
 
-    setIsLoading(true);
-    try {
-      await axiosInstance.post(`/outreach/send/${id}`, {
-        subject: emailFormData.subject,
-        optionalBody: emailFormData.optionalBody,
-      });
+  //   setIsLoading(true);
+  //   try {
+  //     await axiosInstance.post(`/outreach/send/${id}`, {
+  //       subject: emailFormData.subject,
+  //       optionalBody: emailFormData.optionalBody,
+  //     });
 
-      toast.success("Emails sent successfully");
-      setIsSendEmailModalOpen(false);
-      setEmailFormData({
-        subject: "",
-        optionalBody: "",
-      });
-    } catch (error) {
-      toast.error("Failed to send emails");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     toast.success("Emails sent successfully");
+  //     setIsSendEmailModalOpen(false);
+  //     setEmailFormData({
+  //       subject: "",
+  //       optionalBody: "",
+  //     });
+  //   } catch (error) {
+  //     toast.error("Failed to send emails");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleCreateLead = async () => {
     setIsLoading(true);
@@ -291,11 +293,15 @@ export default function LeadCollectionTable({
       toast.error("No leads available to export");
       return;
     }
+    const filteredLeads = leads.filter((lead) => lead.email.length > 0);
 
-    const formattedLeads = leads.map((lead) => ({
-      ...lead,
+    const formattedLeads = filteredLeads.map((lead) => ({
+      title: lead.title || "",
+      description: lead.description || "",
       phone: lead.phone.length > 0 ? lead.phone.join(", ") : "",
       email: lead.email.length > 0 ? lead.email.join(", ") : "",
+      website: lead.website || "",
+      address: lead.address || "",
     }));
 
     const csv = parse(formattedLeads);
@@ -306,7 +312,7 @@ export default function LeadCollectionTable({
   return (
     <div className="w-full">
       <div className="mb-4 flex justify-between items-center gap-4">
-        <Dialog
+        {/* <Dialog
           open={isSendEmailModalOpen}
           onOpenChange={setIsSendEmailModalOpen}
         >
@@ -363,9 +369,19 @@ export default function LeadCollectionTable({
               </Button>
             </div>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
 
         <div className="flex items-center gap-4">
+          <label htmlFor="">
+            <input
+              type="checkbox"
+              id="emailFilter"
+              checked={showOnlyWithEmail}
+              onChange={(e) => setShowOnlyWithEmail(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />&nbsp;
+            Email Only
+          </label>
           <Button
             onClick={exportLeads}
             className="bg-transparent text-black border-2 hover:text-white"
@@ -541,113 +557,123 @@ export default function LeadCollectionTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {leads.map((lead) => (
-              <TableRow key={lead._id} className="hover:bg-gray-50 border-b">
-                <TableCell className="p-3 align-top">{lead.title}</TableCell>
-                <TableCell className="p-3 align-top">
-                  <span className="line-clamp-2">{lead.description}</span>
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.phone &&
-                    lead.phone.map((phoneNumber, index) => (
-                      <div key={index}>
-                        <ClickableLink href={`tel:${phoneNumber}`}>
-                          <Phone size={12} /> {phoneNumber}
-                        </ClickableLink>
-                        {index < lead.phone.length - 1 && <br />}
-                      </div>
-                    ))}
-                </TableCell>
+            {[...leads]
+              .sort((a, b) => {
+                if (a.email.length > 0 && b.email.length === 0) return -1;
+                if (a.email.length === 0 && b.email.length > 0) return 1;
+                return 0;
+              })
+              .filter((lead) => !showOnlyWithEmail || lead.email.length > 0)
+              .map((lead) => (
+                <TableRow key={lead._id} className="hover:bg-gray-50 border-b">
+                  <TableCell className="p-3 align-top">{lead.title}</TableCell>
+                  <TableCell className="p-3 align-top">
+                    <span className="line-clamp-2">{lead.description}</span>
+                  </TableCell>
+                  <TableCell className="p-3 align-top">
+                    {lead.phone &&
+                      lead.phone.map((phoneNumber, index) => (
+                        <div key={index}>
+                          <ClickableLink href={`tel:${phoneNumber}`}>
+                            <Phone size={12} /> {phoneNumber}
+                          </ClickableLink>
+                          {index < lead.phone.length - 1 && <br />}
+                        </div>
+                      ))}
+                  </TableCell>
 
-                <TableCell className="p-3 align-top w-[100px]">
-                  {lead.email[0] && (
-                    <ClickableLink href={`mailto:${lead.email[0]}`}>
-                      <Mail size={12} /> {lead.email[0]}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.website && (
-                    <ClickableLink
-                      href={
-                        lead.website.startsWith("http")
-                          ? lead.website
-                          : `https://${lead.website}`
-                      }
-                    >
-                      {lead.website}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {lead.maplink && (
-                    <ClickableLink href={lead.maplink}>
-                      <MapPin size={12} /> {lead.address}
-                    </ClickableLink>
-                  )}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  {new Date(lead.createdAt).toLocaleDateString()}
-                </TableCell>
-                <TableCell className="p-3 align-top">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      className="hover:bg-gray-100"
-                      onClick={() => setSelectedLead(lead)}
-                    >
-                      View Details
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="hover:bg-gray-100"
-                      onClick={() => {
-                        setEditLead(lead); // Set the lead to edit
-                        setIsEditModalOpen(true); // Open the edit modal
-                      }}
-                    >
-                      <Edit2 size={16} className="text-blue-500" />{" "}
-                      {/* Lucide Edit Icon */}
-                    </Button>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="hover:bg-gray-100">
-                          <Trash2 size={16} className="text-red-500" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Delete Lead</DialogTitle>
-                          <DialogDescription>
-                            Are you sure you want to delete this lead? This
-                            action cannot be undone.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                          <Button variant="outline" disabled={isDeletingLead}>
-                            Cancel
-                          </Button>
+                  <TableCell className="p-3 align-top w-[100px]">
+                    {lead.email[0] && (
+                      <ClickableLink href={`mailto:${lead.email[0]}`}>
+                        <Mail size={12} /> {lead.email[0]}
+                      </ClickableLink>
+                    )}
+                  </TableCell>
+                  <TableCell className="p-3 align-top">
+                    {lead.website && (
+                      <ClickableLink
+                        href={
+                          lead.website.startsWith("http")
+                            ? lead.website
+                            : `https://${lead.website}`
+                        }
+                      >
+                        {lead.website}
+                      </ClickableLink>
+                    )}
+                  </TableCell>
+                  <TableCell className="p-3 align-top">
+                    {lead.maplink && (
+                      <ClickableLink href={lead.maplink}>
+                        <MapPin size={12} /> {lead.address}
+                      </ClickableLink>
+                    )}
+                  </TableCell>
+                  <TableCell className="p-3 align-top">
+                    {new Date(lead.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="p-3 align-top">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className="hover:bg-gray-100"
+                        onClick={() => setSelectedLead(lead)}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="hover:bg-gray-100"
+                        onClick={() => {
+                          setEditLead(lead); // Set the lead to edit
+                          setIsEditModalOpen(true); // Open the edit modal
+                        }}
+                      >
+                        <Edit2 size={16} className="text-blue-500" />{" "}
+                        {/* Lucide Edit Icon */}
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
                           <Button
-                            variant="destructive"
-                            onClick={() => handleDeleteLead(lead._id)}
-                            disabled={isDeletingLead}
+                            variant="outline"
+                            className="hover:bg-gray-100"
                           >
-                            {isDeletingLead ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
-                                Deleting...
-                              </>
-                            ) : (
-                              "Delete"
-                            )}
+                            <Trash2 size={16} className="text-red-500" />
                           </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Delete Lead</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete this lead? This
+                              action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <DialogFooter>
+                            <Button variant="outline" disabled={isDeletingLead}>
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleDeleteLead(lead._id)}
+                              disabled={isDeletingLead}
+                            >
+                              {isDeletingLead ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete"
+                              )}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
